@@ -1,7 +1,6 @@
 {
   "name": "ff-panel",
   "version": "1.0.0",
-  "description": "Free Fire Panel - Body Headshot",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

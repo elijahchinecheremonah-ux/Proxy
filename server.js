@@ -3,143 +3,92 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(__dirname));
 
-// The main config endpoint - THIS is what the game connects to
+// Allow all origins (important for game connections)
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', '*');
+    res.header('Access-Control-Allow-Headers', '*');
+    next();
+});
+
+// === CRITICAL: The game looks for "config2" endpoint ===
+app.get('/config2', (req, res) => {
+    res.json({
+        status: "success",
+        version: "3.0",
+        build: "brutal",
+        config: {
+            body_headshot: true,
+            force_headshot: true,
+            body_to_head: true,
+            all_hit_zones_to_head: true,
+            head_hitbox_scale: 10000,
+            body_hitbox_scale: 0.001,
+            leg_hitbox_scale: 0.0001,
+            aim_lock: true,
+            aim_smoothness: 0,
+            aim_distance: 999,
+            aim_fov: 0.01,
+            no_recoil: true,
+            no_spread: true,
+            damage_multiplier: 10,
+            bullet_tp: true,
+            silent_aim: true,
+            magnet_strength: 200,
+            awm_damage: 99999,
+            awm_headshot_mult: 99999,
+            awm_bullet_speed: 99999,
+            awm_wall_pen: true,
+            all_weapons_headshot: true,
+            anti_ban: true,
+            delay_injection: 5
+        }
+    });
+});
+
+// Also serve /version and /config (some panels check these)
+app.get('/version', (req, res) => {
+    res.json({
+        version: "3.0",
+        build: "brutal",
+        status: "active"
+    });
+});
+
 app.get('/config', (req, res) => {
     res.json({
-        status: "active",
-        version: "3.0",
-        body_headshot: true,
+        status: "success",
         config: {
-            aim: {
-                headshot: {
-                    enabled: true,
-                    mode: "brutal",
-                    chance: 100,
-                    body_to_head: true,
-                    all_hit_zones_to_head: true
-                },
-                aimbot: {
-                    enabled: true,
-                    type: "critical",
-                    lock_bone: "head",
-                    lock_distance: 999,
-                    lock_fov: 0.01,
-                    smoothness: 0,
-                    snap: true,
-                    snap_speed: 999
-                },
-                no_recoil: true,
-                no_spread: true,
-                damage_multiplier: 10,
-                bullet_tp: true,
-                silent_aim: true,
-                magnet: {
-                    enabled: true,
-                    strength: 200
-                }
-            },
-            hitbox: {
-                head: { radius: 100, height: 100, scale: 10000 },
-                body: { radius: 0.001, height: 0.001, scale: 0.001 },
-                neck: { radius: 0.001, height: 0.001 },
-                chest: { radius: 0.001, height: 0.001 },
-                stomach: { radius: 0.001, height: 0.001 },
-                legs: { radius: 0.0001, scale: 0.0001 },
-                arms: { radius: 0.0001, scale: 0.0001 }
-            },
-            weapon: {
-                force_headshot: true,
-                body_to_head: true,
-                awm: {
-                    damage: 99999,
-                    headshot_mult: 99999,
-                    bullet_speed: 99999,
-                    wall_pen: true,
-                    one_tap: true
-                },
-                all_weapons: {
-                    no_recoil: true,
-                    no_spread: true,
-                    bullet_tp: true
-                }
-            },
-            esp: {
-                enabled: true,
-                box: true,
-                line: true,
-                distance: true,
-                name: true,
-                health: true,
-                enemy_only: true
-            },
-            radar: {
-                enabled: true,
-                zoom: 300,
-                show_enemies: true
-            },
-            movement: {
-                speed_multiplier: 1.5,
-                jump_multiplier: 1.5,
-                no_fall_damage: true
-            },
-            visuals: {
-                no_fog: true,
-                no_grass: true,
-                brightness: 200
-            },
-            anti_ban: {
-                enabled: true,
-                hide_panel: true,
-                clear_logs: true,
-                delay_injection: 5
-            }
+            body_headshot: true,
+            force_headshot: true
         }
     });
 });
 
-// Injection endpoint - sends payload to the game
-app.get('/inject', (req, res) => {
-    res.json({
-        status: "injecting",
-        payload: {
-            memory_patches: [
-                { address: "0x0A3F7B1C", value: -1.0, type: "float" },
-                { address: "0x0A3F7B20", value: 0.0, type: "float" },
-                { address: "0x0E2A4F80", value: 5, type: "int" },
-                { address: "0x0D1C8A40", value: 1, type: "int" },
-                { address: "0x0D2F8000", value: 1, type: "int" },
-                { address: "0x0B3F2000", value: 0.0, type: "float" },
-                { address: "0x0A3F7B24", value: 0.0, type: "float" },
-                { address: "0x0A4F7000", value: 0.1, type: "float" },
-                { address: "0x0C4E1000", value: 1, type: "int" },
-                { address: "0x0D3A9000", value: 100.0, type: "float" }
-            ],
-            config_overrides: {
-                body_to_head: true,
-                head_hitbox_scale: 10000,
-                body_hitbox_scale: 0.001
-            }
-        }
-    });
-});
-
-// Status endpoint
-app.get('/status', (req, res) => {
-    res.json({
-        server: "online",
-        version: "3.0",
-        connected: true,
-        body_headshot: true
-    });
-});
-
-// Web interface
+// Root endpoint for the web panel
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head><title>FF Panel</title></head>
+    <body style="background:#000;color:#0f0;font-family:monospace;padding:20px;">
+        <h1>⚡ FF PANEL</h1>
+        <p>Status: ✅ Online</p>
+        <p>Version: 3.0</p>
+        <p>Body Headshot: Active</p>
+        <hr>
+        <p>Your verAddr:</p>
+        <code style="background:#111;padding:10px;display:block;margin:10px 0;">
+            ${req.protocol}://${req.get('host')}
+        </code>
+        <p>Paste this into localconfig.json</p>
+    </body>
+    </html>
+    `);
 });
 
 app.listen(PORT, () => {
     console.log(`✅ Panel running on port ${PORT}`);
+    console.log(`✅ Config2 endpoint ready`);
 });
