@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF Panel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0f;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container { max-width: 500px; width: 100%; }
+        h1 {
+            text-align: center;
+            padding: 30px 0;
+            font-size: 24px;
+            background: linear-gradient(135deg, #00f5ff, #ff00e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card {
+            background: #12121a;
+            border: 1px solid #1a1a2e;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .card h2 { font-size: 16px; color: #00f5ff; margin-bottom: 10px; }
+        .info {
+            background: #0a0a0f;
+            border: 1px solid #1a1a2e;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #00ff88;
+            margin: 10px 0;
+        }
+        .info span { color: #666; }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #00f5ff, #ff00e5);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .step {
+            background: #12121a;
+            border: 1px solid #1a1a2e;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .step h3 { color: #ff00e5; font-size: 14px; margin-bottom: 8px; }
+        .step p { color: #aaa; font-size: 13px; line-height: 1.6; }
+        .step code {
+            background: #0a0a0f;
+            color: #00f5ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            word-break: break-all;
+        }
+        .footer { text-align: center; color: #333; font-size: 12px; margin-top: 30px; }
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00ff88;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ FF PANEL</h1>
+        
+        <div class="card">
+            <h2>📡 SERVER STATUS</h2>
+            <div class="info">
+                <span class="status-dot"></span>Online<br>
+                <span>Version:</span> 3.0<br>
+                <span>Body Headshot:</span> ✅ Active<br>
+                <span>Connected Clients:</span> <span id="clients">0</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 HOW TO CONNECT</h2>
+            <div class="step">
+                <h3>Step 1</h3>
+                <p>Create or edit this file on your phone:</p>
+                <code>/storage/emulated/0/Android/data/<br>com.dts.freefireth/files/localconfig.json</code>
+            </div>
+            <div class="step">
+                <h3>Step 2</h3>
+                <p>Paste this into the file:</p>
+                <code id="configCode">Loading...</code>
+            </div>
+            <div class="step">
+                <h3>Step 3</h3>
+                <p>Open Norman FF and play. Every shot = headshot.</p>
+            </div>
+        </div>
+
+        <button class="btn" onclick="copyConfig()">📋 COPY CONFIG</button>
+
+        <div class="footer">© 2026 FF Panel</div>
+    </div>
+
+    <script>
+        // Get the current domain
+        const baseUrl = window.location.origin;
+        
+        // Build the config with this domain as verAddr
+        const config = {
+            "verAddr": baseUrl,
+            "COPYRIGHT": "© 2026 FF PANEL",
+            "config_version": 3,
+            "body_headshot": true,
+            "force_headshot": true,
+            "body_to_head": true,
+            "all_hit_zones_to_head": true,
+            "hitbox": {
+                "head_scale": 10000,
+                "body_scale": 0.001,
+                "leg_scale": 0.0001
+            },
+            "weapon": {
+                "awm_damage": 99999,
+                "all_headshot": true,
+                "no_recoil": true,
+                "no_spread": true
+            },
+            "aim": {
+                "lock": true,
+                "smoothness": 0,
+                "distance": 999
+            },
+            "anti_ban": {
+                "enabled": true,
+                "delay": 5
+            }
+        };
+
+        const configStr = JSON.stringify(config, null, 2);
+        document.getElementById('configCode').textContent = configStr;
+
+        function copyConfig() {
+            navigator.clipboard.writeText(configStr).then(() => {
+                const btn = document.querySelector('.btn');
+                btn.textContent = '✅ COPIED!';
+                setTimeout(() => { btn.textContent = '📋 COPY CONFIG'; }, 2000);
+            });
+        }
+
+        // Simulate client count
+        setInterval(() => {
+            document.getElementById('clients').textContent = Math.floor(Math.random() * 10) + 1;
+        }, 3000);
+    </script>
+</body>
+</html>
